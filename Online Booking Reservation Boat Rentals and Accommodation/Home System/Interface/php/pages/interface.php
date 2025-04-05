@@ -222,7 +222,7 @@ require_once('../config/connect.php');
                 </div>
                 <div class="nav-right">
                     <div class="secondary-nav">
-                        <a href="#" class="contact-link"><i class="fas fa-envelope"></i>CONTACT US</a>
+                        <a href="#" class="contact-link" id="contactLink"><i class="fas fa-envelope"></i>CONTACT US</a>
                         <a href="#" class="book-link"><i class="fas fa-calendar-check"></i>BOOK NOW</a>
                         <a href="#" class="login-link"><i class="fas fa-user"></i>LOGIN</a>
                     </div>
@@ -249,7 +249,7 @@ require_once('../config/connect.php');
                     <li><a href="#">GALLERY</a></li>
                 </ul>
                 <div class="mobile-secondary-nav">
-                    <a href="#" class="contact-link">CONTACT US</a>
+                    <a href="#" class="contact-link" id="mobileContactLink">CONTACT US</a>
                     <a href="#" class="book-link">BOOK NOW</a>
                     <a href="../../Admin and User Loginup/loginup_admin.php" class="login-link">LOGIN</a>
                 </div>
@@ -262,6 +262,63 @@ require_once('../config/connect.php');
             </div>
         </div>
     </header>
+
+    <!-- Search Overlay -->
+    <div class="search-overlay" id="searchOverlay">
+        <!-- Ocean Waves -->
+        <div class="search-ocean">
+            <div class="search-wave"></div>
+            <div class="search-wave"></div>
+        </div>
+        
+        <div class="search-overlay-content">
+            <div class="search-close-btn">
+                <i class="fas fa-times"></i>
+            </div>
+            <div class="search-header">
+                <h2>What are you looking for?</h2>
+            </div>
+            <div class="search-input-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Search beaches, islands, boat rentals...">
+                <button class="search-btn">Search</button>
+            </div>
+            <div class="search-suggestions">
+                <div class="suggestion-categories">
+                    <div class="suggestion-category">
+                        <h3><i class="fas fa-umbrella-beach"></i> Popular Destinations</h3>
+                        <ul>
+                            <li><a href="#"><i class="fas fa-chevron-right"></i> Gigantes Islands</a></li>
+                            <li><a href="#"><i class="fas fa-chevron-right"></i> Sicogon Island</a></li>
+                            <li><a href="#"><i class="fas fa-chevron-right"></i> Cabugao Gamay</a></li>
+                            <li><a href="#"><i class="fas fa-chevron-right"></i> Bantigue Sandbar</a></li>
+                        </ul>
+                    </div>
+                    <div class="suggestion-category">
+                        <h3><i class="fas fa-ship"></i> Boat Rentals</h3>
+                        <ul>
+                            <li><a href="#"><i class="fas fa-chevron-right"></i> Small Boats (1-5 pax)</a></li>
+                            <li><a href="#"><i class="fas fa-chevron-right"></i> Medium Boats (6-10 pax)</a></li>
+                            <li><a href="#"><i class="fas fa-chevron-right"></i> Large Boats (11-20 pax)</a></li>
+                            <li><a href="#"><i class="fas fa-chevron-right"></i> Luxury Boats (VIP)</a></li>
+                        </ul>
+                    </div>
+                    <div class="suggestion-category">
+                        <h3><i class="fas fa-map-marked-alt"></i> Tour Packages</h3>
+                        <ul>
+                            <li><a href="#"><i class="fas fa-chevron-right"></i> Island Hopping</a></li>
+                            <li><a href="#"><i class="fas fa-chevron-right"></i> Sunset Cruise</a></li>
+                            <li><a href="#"><i class="fas fa-chevron-right"></i> Overnight Tour</a></li>
+                            <li><a href="#"><i class="fas fa-chevron-right"></i> Private Tour</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="search-results" style="display: none;">
+                    <!-- Search results will be populated here dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
 
 <!-- Hero Section -->
     <main id="main-content">
@@ -1004,5 +1061,153 @@ if (mobileMenuToggle && mobileMenu) {
         });
     });
     </script>
+    
+    <!-- Search Functionality Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get search elements
+        const searchToggle = document.querySelector('.search-toggle');
+        const searchToggleMobile = document.querySelector('.search-toggle-mobile');
+        const searchOverlay = document.getElementById('searchOverlay');
+        const searchCloseBtn = document.querySelector('.search-close-btn');
+        const searchInput = document.querySelector('.search-input');
+        
+        console.log('Search elements loaded:', {
+            searchToggle, searchToggleMobile, searchOverlay, searchCloseBtn
+        });
+        
+        // Open search overlay
+        function openSearchOverlay() {
+            if (searchOverlay) {
+                searchOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                if (searchInput) {
+                    setTimeout(() => searchInput.focus(), 300);
+                }
+            }
+        }
+        
+        // Close search overlay
+        function closeSearchOverlay() {
+            if (searchOverlay) {
+                searchOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Add event listener to search toggle
+        if (searchToggle) {
+            searchToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Search toggle clicked');
+                openSearchOverlay();
+            });
+        }
+        
+        // Add event listener to mobile search toggle
+        if (searchToggleMobile) {
+            searchToggleMobile.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Mobile search toggle clicked');
+                openSearchOverlay();
+            });
+        }
+        
+        // Add event listener to close button
+        if (searchCloseBtn) {
+            searchCloseBtn.addEventListener('click', function() {
+                console.log('Close button clicked');
+                closeSearchOverlay();
+            });
+        }
+        
+        // Close search overlay on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && searchOverlay && searchOverlay.classList.contains('active')) {
+                closeSearchOverlay();
+            }
+        });
+        
+        // Handle search input
+        if (searchInput) {
+            const searchResults = document.querySelector('.search-results');
+            const suggestionCategories = document.querySelector('.suggestion-categories');
+            
+            searchInput.addEventListener('input', function() {
+                const query = this.value.trim().toLowerCase();
+                if (searchResults && suggestionCategories) {
+                    if (query.length > 0) {
+                        searchResults.style.display = 'block';
+                        suggestionCategories.style.display = 'none';
+                        
+                        // Simple search results display
+                        searchResults.innerHTML = `<h3>Search Results for "${query}"</h3>
+                            <div class="results-grid">
+                                <div class="result-category">
+                                    <h4><i class="fas fa-umbrella-beach"></i> Destinations</h4>
+                                    <ul>
+                                        <li><a href="#"><i class="fas fa-chevron-right"></i> Gigantes Islands</a></li>
+                                        <li><a href="#"><i class="fas fa-chevron-right"></i> Sicogon Island</a></li>
+                                    </ul>
+                                </div>
+                            </div>`;
+                    } else {
+                        searchResults.style.display = 'none';
+                        suggestionCategories.style.display = 'flex';
+                    }
+                }
+            });
+        }
+    });
+    </script>
+
+    <!-- Contact Form Modal -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Contact Us</h2>
+            <form id="contactForm" class="contact-form">
+                <div class="form-group">
+                    <label for="name">Full Name *</label>
+                    <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email address" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" placeholder="Enter your phone number">
+                </div>
+                <div class="form-group">
+                    <label for="subject">Subject *</label>
+                    <select id="subject" name="subject" required>
+                        <option value="">Select a subject</option>
+                        <option value="general">General Inquiry</option>
+                        <option value="booking">Booking Question</option>
+                        <option value="boat">Boat Rental</option>
+                        <option value="island">Island Tour</option>
+                        <option value="beach">Beach Activities</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="message">Message *</label>
+                    <textarea id="message" name="message" rows="5" placeholder="Enter your message here" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="file">Attachments (optional)</label>
+                    <input type="file" id="file" name="file" multiple>
+                </div>
+                <button type="submit" class="submit-btn">Send Message</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <script src="../../js/interface.js"></script>
+    <script src="../../js/test-contact.js"></script>
+    <script src="../../js/contact-modal.js"></script>
 </body>
 </html>

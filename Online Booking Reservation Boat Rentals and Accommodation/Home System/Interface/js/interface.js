@@ -4,6 +4,108 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Contact form modal initialization
+    const contactLinks = document.querySelectorAll('.contact-link');
+    const modal = document.getElementById('contactModal');
+    const closeBtn = modal ? modal.querySelector('.close') : null;
+    const contactForm = modal ? modal.querySelector('form') : null;
+
+    console.log('Contact form elements:', {
+        contactLinks: contactLinks.length,
+        modal: modal,
+        closeBtn: closeBtn,
+        contactForm: contactForm
+    });
+
+    if (contactLinks.length > 0 && modal && closeBtn && contactForm) {
+        // Open modal when any contact link is clicked
+        contactLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Contact link clicked');
+                modal.style.display = 'flex';
+                setTimeout(() => {
+                    modal.classList.add('show');
+                }, 10);
+                document.body.style.overflow = 'hidden';
+                
+                // If clicked from mobile menu, close the mobile menu
+                const mobileMenu = document.querySelector('.mobile-menu');
+                if (mobileMenu && mobileMenu.classList.contains('active')) {
+                    mobileMenu.classList.remove('active');
+                    const menuToggle = document.querySelector('.mobile-menu-toggle');
+                    if (menuToggle) {
+                        menuToggle.classList.remove('active');
+                        menuToggle.setAttribute('aria-expanded', 'false');
+                    }
+                }
+            });
+        });
+
+        // Close modal when close button is clicked
+        closeBtn.addEventListener('click', function() {
+            console.log('Close button clicked');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+            document.body.style.overflow = '';
+        });
+
+        // Close modal when clicking outside
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                console.log('Clicked outside modal');
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Handle form submission
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Form submitted');
+            
+            // Get form data
+            const formData = new FormData(contactForm);
+            
+            // Here you would typically send the form data to your server
+            // For now, we'll just show a success message
+            alert('Thank you for your message! We will get back to you soon.');
+            
+            // Reset form and close modal
+            contactForm.reset();
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+            document.body.style.overflow = '';
+        });
+    } else {
+        console.error('Some contact form elements are missing:', {
+            contactLinks: contactLinks.length,
+            modal: !!modal,
+            closeBtn: !!closeBtn,
+            contactForm: !!contactForm
+        });
+    }
+
+    // Debug logs for search functionality
+    console.log('DOM fully loaded');
+    
+    const searchToggle = document.querySelector('.search-toggle');
+    const searchToggleMobile = document.querySelector('.search-toggle-mobile');
+    const searchOverlay = document.getElementById('searchOverlay');
+    
+    console.log('Search elements:', {
+        searchToggle: searchToggle,
+        searchToggleMobile: searchToggleMobile,
+        searchOverlay: searchOverlay
+    });
+    
     // Initialize animations on page load
     initPageLoadAnimations();
     
@@ -39,17 +141,77 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Search icon functionality
-    const searchToggle = document.querySelector('.search-toggle');
-    const searchContainer = document.querySelector('.search-container');
+    const searchCloseBtn = document.querySelector('.search-close-btn');
+    const searchInput = document.querySelector('.search-input');
     const socialIcons = document.querySelector('.social-icons');
     
-    if (searchToggle && socialIcons) {
-        searchToggle.addEventListener('click', function() {
-            socialIcons.classList.toggle('expanded');
-            searchToggle.classList.toggle('active');
+    // Function to open search overlay
+    function openSearchOverlay() {
+        searchOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Prevent scrolling when overlay is active
+        setTimeout(() => {
+            searchInput.focus(); // Auto focus on the search input
+        }, 500);
+    }
+    
+    // Function to close search overlay
+    function closeSearchOverlay() {
+        searchOverlay.classList.remove('active');
+        document.body.style.overflow = ''; // Re-enable scrolling
+    }
+    
+    // Toggle search overlay on search icon click
+    if (searchToggle) {
+        searchToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            openSearchOverlay();
+            searchToggle.classList.add('active');
+        });
+    }
+    
+    // Toggle search overlay on mobile search icon click
+    if (searchToggleMobile) {
+        searchToggleMobile.addEventListener('click', function(e) {
+            e.preventDefault();
+            openSearchOverlay();
+        });
+    }
+    
+    // Close search overlay on close button click
+    if (searchCloseBtn) {
+        searchCloseBtn.addEventListener('click', function() {
+            closeSearchOverlay();
+            searchToggle.classList.remove('active');
+        });
+    }
+    
+    // Close search overlay on escape key press
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && searchOverlay.classList.contains('active')) {
+            closeSearchOverlay();
+            searchToggle.classList.remove('active');
+        }
+    });
+    
+    // Handle search input functionality
+    if (searchInput) {
+        const searchResults = document.querySelector('.search-results');
+        const suggestionCategories = document.querySelector('.suggestion-categories');
+        
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim().toLowerCase();
             
-            if (searchContainer) {
-                searchContainer.classList.toggle('active');
+            if (query.length > 0) {
+                // Show search results and hide suggestion categories
+                searchResults.style.display = 'block';
+                suggestionCategories.style.display = 'none';
+                
+                // Simulate search results (you would replace this with actual search logic)
+                simulateSearchResults(query, searchResults);
+            } else {
+                // Hide search results and show suggestion categories
+                searchResults.style.display = 'none';
+                suggestionCategories.style.display = 'flex';
             }
         });
     }
@@ -631,4 +793,101 @@ function getServicePrice(serviceType, passengerCount) {
     };
     
     return servicePrices[serviceType] || 0;
+}
+
+// Function to simulate search results (replace with actual search implementation)
+function simulateSearchResults(query, resultsContainer) {
+    // Sample data structure for demonstration
+    const data = {
+        destinations: [
+            { name: 'Gigantes Islands', type: 'Island', url: '#' },
+            { name: 'Cabugao Gamay Beach', type: 'Beach', url: '#' },
+            { name: 'Sicogon Island', type: 'Island', url: '#' },
+            { name: 'Bantigue Sandbar', type: 'Beach', url: '#' }
+        ],
+        boats: [
+            { name: 'Small Boat (1-5 pax)', type: 'Boat Rental', url: '#' },
+            { name: 'Medium Boat (6-10 pax)', type: 'Boat Rental', url: '#' },
+            { name: 'Large Boat (11-20 pax)', type: 'Boat Rental', url: '#' },
+            { name: 'Luxury Boat (VIP)', type: 'Boat Rental', url: '#' }
+        ],
+        tours: [
+            { name: 'Island Hopping Tour', type: 'Tour Package', url: '#' },
+            { name: 'Sunset Cruise', type: 'Tour Package', url: '#' },
+            { name: 'Overnight Tour', type: 'Tour Package', url: '#' },
+            { name: 'Private Tour', type: 'Tour Package', url: '#' }
+        ]
+    };
+    
+    // Filter the data based on query
+    const filteredResults = {
+        destinations: data.destinations.filter(item => item.name.toLowerCase().includes(query)),
+        boats: data.boats.filter(item => item.name.toLowerCase().includes(query)),
+        tours: data.tours.filter(item => item.name.toLowerCase().includes(query))
+    };
+    
+    // Build results HTML
+    let resultsHTML = '';
+    let totalResults = 0;
+    
+    // Check if we have any results
+    const hasDestinations = filteredResults.destinations.length > 0;
+    const hasBoats = filteredResults.boats.length > 0;
+    const hasTours = filteredResults.tours.length > 0;
+    
+    if (hasDestinations || hasBoats || hasTours) {
+        resultsHTML += `<h3>Search Results for "${query}"</h3><div class="results-grid">`;
+        
+        // Add destinations
+        if (hasDestinations) {
+            resultsHTML += '<div class="result-category"><h4><i class="fas fa-umbrella-beach"></i> Destinations</h4><ul>';
+            filteredResults.destinations.forEach(item => {
+                resultsHTML += `<li><a href="${item.url}"><i class="fas fa-chevron-right"></i> ${item.name} <span>${item.type}</span></a></li>`;
+                totalResults++;
+            });
+            resultsHTML += '</ul></div>';
+        }
+        
+        // Add boats
+        if (hasBoats) {
+            resultsHTML += '<div class="result-category"><h4><i class="fas fa-ship"></i> Boat Rentals</h4><ul>';
+            filteredResults.boats.forEach(item => {
+                resultsHTML += `<li><a href="${item.url}"><i class="fas fa-chevron-right"></i> ${item.name}</a></li>`;
+                totalResults++;
+            });
+            resultsHTML += '</ul></div>';
+        }
+        
+        // Add tours
+        if (hasTours) {
+            resultsHTML += '<div class="result-category"><h4><i class="fas fa-map-marked-alt"></i> Tour Packages</h4><ul>';
+            filteredResults.tours.forEach(item => {
+                resultsHTML += `<li><a href="${item.url}"><i class="fas fa-chevron-right"></i> ${item.name}</a></li>`;
+                totalResults++;
+            });
+            resultsHTML += '</ul></div>';
+        }
+        
+        resultsHTML += '</div>';
+    } else {
+        resultsHTML = `<div class="no-results">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>No results found for "${query}"</p>
+            <p class="no-results-tip">Try a different search term or browse our suggestions below.</p>
+            <button class="btn-show-suggestions">Show Suggestions</button>
+        </div>`;
+    }
+    
+    // Update the results container
+    resultsContainer.innerHTML = resultsHTML;
+    
+    // Add event listener to the "Show Suggestions" button if it exists
+    const showSuggestionsBtn = resultsContainer.querySelector('.btn-show-suggestions');
+    if (showSuggestionsBtn) {
+        showSuggestionsBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            searchResults.style.display = 'none';
+            suggestionCategories.style.display = 'flex';
+        });
+    }
 } 
